@@ -94,6 +94,6 @@ app.put('/image', (req, res) => {
 })
 
 
-app.listen(3000, () => {
-    console.log('App is running.')
+app.listen(3001, () => {
+    console.log('App is running on port 3001.')
 })
