@@ -15,37 +15,11 @@ const knex = require('knex')({
 
 const app = express()
 
+// middleware
 app.use(bodyParser.json())
 app.use(cors())
 
-const database = {
-    users: [
-        {
-            id: 123,
-            name: 'Sally',
-            email: 'sally@gmail.com',
-            password: 'bananas',
-            entries: 0,
-            joined: new Date()
-        },
-        {
-            id: 124,
-            name: 'John',
-            email: 'john@gmail.com',
-            password: 'cookies',
-            entries: 0,
-            joined: new Date()
-        }
-    ],
-    login: [
-        {
-            id: 978,
-            hash: '',
-            email: 'john@gmail'
-        }
-    ]
-}
-
+// endpoints
 app.get('/', (req, res) => {
     res.json(database.users)
 })
