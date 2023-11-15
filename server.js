@@ -21,7 +21,7 @@ app.use(cors())
 
 // endpoints
 app.get('/', (req, res) => {
-    res.json(database.users)
+    res.json("success")
 })
 
 app.post('/signin', (req, res) => {
@@ -68,16 +68,10 @@ app.post('/register', (req, res) => {
 
 app.get('/profile/:id', (req, res) => {
     const {id} = req.params
-    let found = false
-    database.users.forEach(user => {
-        if (user.id == id) {
-            found = true
-            return res.json(user)
-        }
-    })
-    if (!found) {
-        res.status(404).json('User not found')
-    }
+    knex('users').select('*')
+        .where({id: id})
+        .then(user => res.json(user[0]))
+        .catch(error => res.status(400).json('user not found'))
 })
 
 app.put('/image', (req, res) => {
