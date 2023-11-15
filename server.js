@@ -25,12 +25,22 @@ app.get('/', (req, res) => {
 })
 
 app.post('/signin', (req, res) => {
-    if (req.body.email === database.users[0].email &&
-        req.body.password === database.users[0].password) {
-        res.json(database.users[0])
-    } else {
-        res.status(400).json('Error logging in.')
-    }
+    knex('login')
+        .select('hash', 'email')
+        .where({email: req.body.email})
+        .then(data => {
+            const isValid = bcrypt.compareSync(req.body.password, data[0].hash)
+            if (isValid) {
+                knex('users')
+                    .select('*')
+                    .where({email: req.body.email})
+                    .then(user => res.json(user[0]))
+                    .catch(error => res.status(400).json('unable to signin'))
+            } else {
+                res.status(400).json('wrong credentials')
+            }
+        })
+        .catch(error => res.status(400).json('wrong credentials'))
 })
 
 app.post('/register', (req, res) => {
