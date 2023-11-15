@@ -35,18 +35,25 @@ app.post('/signin', (req, res) => {
 
 app.post('/register', (req, res) => {
     const {name, email, password} = req.body
-/*     bcrypt.hash(password, null, null, function(err, hash) {
-        console.log(hash)
-      }); */
-    database.users.push({
-        id: 125,
-        name: name,
-        email: email,
-        password: password,
-        entries: 0,
-        joined: new Date()
+    const hash = bcrypt.hashSync(password)
+    knex.transaction(trx => {
+        trx('login').insert({
+            email: email,
+            hash: hash
+        })
+        .returning('email')
+        .then(loginEmail => {
+            trx('users').insert({
+                name: name,
+                email: loginEmail[0].email,
+                joined: new Date()
+            })
+            .returning('*')
+            .then(user => res.json(user[0]))
+        })
+        .then(trx.commit)
+        .catch(trx.rollback)
     })
-    res.json(database.users[database.users.length-1])
 })
 
 app.get('/profile/:id', (req, res) => {
