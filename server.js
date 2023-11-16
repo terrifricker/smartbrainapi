@@ -75,18 +75,27 @@ app.get('/profile/:id', (req, res) => {
 })
 
 app.put('/image', (req, res) => {
-    const {id} = req.body
-    let found = false
-    database.users.forEach(user => {
-        if (user.id == id) {
-            found = true
-            user.entries++
-            return res.json(user.entries)
-        }
+    let {id} = req.body
+    console.log("req.body: ", req.body)
+    console.log("id: ", id)
+    knex.transaction(trx => {
+        trx('users')
+        .select('entries')
+        .where({id: id})
+        .returning('entries')
+        .then(response => {
+            trx('users')
+                .where({id: id})
+                .update({entries: parseInt(response[0].entries) + 1})
+                .returning('entries')
+                .then(response => {
+                    console.log("second response: ", response)
+                    res.json(response[0].entries)})
+                .catch(error => res.status(400).json('entries update failed'))
+        })
+        .then(trx.commit)
+        .catch(trx.rollback)
     })
-    if (!found) {
-        res.status(404).json('User not found')
-    }
 })
 
 
