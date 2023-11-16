@@ -7,6 +7,7 @@ const knex = require('knex')
 const signin = require('./controllers/signin')
 const register = require('./controllers/register')
 const profile = require('./controllers/profile')
+const image = require('./controllers/image')
 
 // set database
 const db = knex({
@@ -35,30 +36,7 @@ app.post('/register', (req, res) => register.handleRegister(req, res, db, bcrypt
 
 app.get('/profile/:id', (req, res) => profile.handleProfile(req, res, db))
 
-app.put('/image', (req, res) => {
-    let {id} = req.body
-    console.log("req.body: ", req.body)
-    console.log("id: ", id)
-    db.transaction(trx => {
-        trx('users')
-        .select('entries')
-        .where({id: id})
-        .returning('entries')
-        .then(response => {
-            trx('users')
-                .where({id: id})
-                .update({entries: parseInt(response[0].entries) + 1})
-                .returning('entries')
-                .then(response => {
-                    console.log("second response: ", response)
-                    res.json(response[0].entries)})
-                .catch(error => res.status(400).json('entries update failed'))
-        })
-        .then(trx.commit)
-        .catch(trx.rollback)
-    })
-})
-
+app.put('/image', (req, res) => image.handleImage(req, res, db))
 
 app.listen(3001, () => {
     console.log('App is running on port 3001.')
