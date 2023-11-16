@@ -3,6 +3,9 @@ const bodyParser = require('body-parser')
 const bcrypt = require('bcrypt-nodejs')
 const cors = require('cors')
 const knex = require('knex')
+
+const signin = require('./controllers/signin')
+
 // set database
 const db = knex({
     client: 'pg',
@@ -26,24 +29,7 @@ app.get('/', (req, res) => {
     res.json("success")
 })
 
-app.post('/signin', (req, res) => {
-    knex('login')
-        .select('hash', 'email')
-        .where({email: req.body.email})
-        .then(data => {
-            const isValid = bcrypt.compareSync(req.body.password, data[0].hash)
-            if (isValid) {
-                knex('users')
-                    .select('*')
-                    .where({email: req.body.email})
-                    .then(user => res.json(user[0]))
-                    .catch(error => res.status(400).json('unable to signin'))
-            } else {
-                res.status(400).json('wrong credentials')
-            }
-        })
-        .catch(error => res.status(400).json('wrong credentials'))
-})
+app.post('/signin', (req, res) => signin.handleSignIn(req, res, db, bcrypt))
 
 app.post('/register', (req, res) => {
     const {name, email, password} = req.body
