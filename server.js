@@ -5,6 +5,7 @@ const cors = require('cors')
 const knex = require('knex')
 
 const signin = require('./controllers/signin')
+const register = require('./controllers/register')
 
 // set database
 const db = knex({
@@ -29,28 +30,7 @@ app.get('/', (req, res) => res.json("success"))
 
 app.post('/signin', (req, res) => signin.handleSignIn(req, res, db, bcrypt))
 
-app.post('/register', (req, res) => {
-    const {name, email, password} = req.body
-    const hash = bcrypt.hashSync(password)
-    db.transaction(trx => {
-        trx('login').insert({
-            email: email,
-            hash: hash
-        })
-        .returning('email')
-        .then(loginEmail => {
-            trx('users').insert({
-                name: name,
-                email: loginEmail[0].email,
-                joined: new Date()
-            })
-            .returning('*')
-            .then(user => res.json(user[0]))
-        })
-        .then(trx.commit)
-        .catch(trx.rollback)
-    })
-})
+app.post('/register', (req, res) => register.handleRegister(req, res, db, bcrypt))
 
 app.get('/profile/:id', (req, res) => {
     const {id} = req.params
