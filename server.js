@@ -2,7 +2,9 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const bcrypt = require('bcrypt-nodejs')
 const cors = require('cors')
-const knex = require('knex')({
+const knex = require('knex')
+// set database
+const db = knex({
     client: 'pg',
     connection: {
       host : '127.0.0.1',
@@ -46,7 +48,7 @@ app.post('/signin', (req, res) => {
 app.post('/register', (req, res) => {
     const {name, email, password} = req.body
     const hash = bcrypt.hashSync(password)
-    knex.transaction(trx => {
+    db.transaction(trx => {
         trx('login').insert({
             email: email,
             hash: hash
@@ -68,7 +70,7 @@ app.post('/register', (req, res) => {
 
 app.get('/profile/:id', (req, res) => {
     const {id} = req.params
-    knex('users').select('*')
+    db('users').select('*')
         .where({id: id})
         .then(user => res.json(user[0]))
         .catch(error => res.status(400).json('user not found'))
@@ -78,7 +80,7 @@ app.put('/image', (req, res) => {
     let {id} = req.body
     console.log("req.body: ", req.body)
     console.log("id: ", id)
-    knex.transaction(trx => {
+    db.transaction(trx => {
         trx('users')
         .select('entries')
         .where({id: id})
