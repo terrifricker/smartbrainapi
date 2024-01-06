@@ -20,7 +20,8 @@ const db = knex({
       port : 5432,
       user : 'find_a_face_admin',
       password : 'rmyOI6ZdzKglnG0nWJh91OU1MV6GbqKN',
-      database : 'find_a_face_db'
+      database : 'find_a_face_db',
+      ssl: true,
     }
   });
 
